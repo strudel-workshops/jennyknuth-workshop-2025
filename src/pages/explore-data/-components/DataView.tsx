@@ -1,44 +1,41 @@
 import { Alert, Box, LinearProgress, Skeleton } from '@mui/material';
 import { GridPaginationModel } from '@mui/x-data-grid';
-import React, { useState } from 'react';
-import { useFilters } from '../../../components/FilterContext';
+import React, { useState, useMemo } from 'react';
 import { SciDataGrid } from '../../../components/SciDataGrid';
-import { filterData } from '../../../utils/filters.utils';
-import { useListQuery } from '../../../hooks/useListQuery';
-import { FilterConfig } from '../../../types/filters.types';
+import { useHapiCatalog } from '../../../hooks/useHapiCatalog';
 
 interface DataViewProps {
-  filterConfigs: FilterConfig[];
+  serverUrl: string;
   searchTerm: string;
   setPreviewItem: React.Dispatch<React.SetStateAction<any>>;
 }
 /**
- * Query the data rows and render as an interactive table
+ * Query the HAPI catalog and render datasets as an interactive table
  */
 export const DataView: React.FC<DataViewProps> = ({
-  filterConfigs,
+  serverUrl,
   searchTerm,
   setPreviewItem,
 }) => {
-  const { activeFilters } = useFilters();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [offset, setOffest] = useState(page * pageSize);
-  // CUSTOMIZE: the unique ID field for the data source
-  const dataIdField = 'Id';
-  // CUSTOMIZE: query mode, 'client' or 'server'
-  const queryMode = 'client';
-  const { isPending, isFetching, isError, data, error } = useListQuery({
-    activeFilters,
-    // CUSTOMIZE: the table data source
-    dataSource: 'dummy-data/exoplanets.csv',
-    filterConfigs,
-    offset,
-    page,
-    pageSize,
-    queryMode,
-    staticParams: null,
-  });
+  const { isPending, isFetching, isError, data, error } =
+    useHapiCatalog(serverUrl);
+
+  // Filter datasets based on search term
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    if (!searchTerm) return data;
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return data.filter((dataset) => {
+      return (
+        dataset.id.toLowerCase().includes(lowerSearchTerm) ||
+        dataset.title?.toLowerCase().includes(lowerSearchTerm) ||
+        dataset.description?.toLowerCase().includes(lowerSearchTerm)
+      );
+    });
+  }, [data, searchTerm]);
 
   const handleRowClick = (rowData: any) => {
     setPreviewItem(rowData.row);
@@ -47,11 +44,8 @@ export const DataView: React.FC<DataViewProps> = ({
   const handlePaginationModelChange = (model: GridPaginationModel) => {
     // Reset page to first when the page size changes
     const newPage = model.pageSize !== pageSize ? 0 : model.page;
-    const newPageSize = model.pageSize;
-    const newOffset = newPage * newPageSize;
     setPage(newPage);
-    setPageSize(newPageSize);
-    setOffest(newOffset);
+    setPageSize(model.pageSize);
   };
 
   // Show a loading skeleton while the initial query is pending
@@ -81,47 +75,39 @@ export const DataView: React.FC<DataViewProps> = ({
     <>
       {isFetching && <LinearProgress variant="indeterminate" />}
       <SciDataGrid
-        rows={filterData(data, activeFilters, filterConfigs, searchTerm)}
+        rows={filteredData}
         pagination
-        paginationMode={queryMode}
+        paginationMode="client"
         onPaginationModelChange={handlePaginationModelChange}
-        getRowId={(row) => row[dataIdField]}
-        // CUSTOMIZE: the table columns
+        getRowId={(row) => row.id}
         columns={[
           {
-            field: 'Planet Name',
-            headerName: 'Planet Name',
-            width: 200,
+            field: 'id',
+            headerName: 'Dataset ID',
+            width: 250,
+            flex: 1,
           },
           {
-            field: 'Planet Host',
-            headerName: 'Planet Host',
-            width: 200,
+            field: 'title',
+            headerName: 'Title',
+            width: 300,
+            flex: 2,
           },
           {
-            field: 'Discovery Method',
-            headerName: 'Discovery Method',
-            width: 200,
+            field: 'startDate',
+            headerName: 'Start Date',
+            width: 180,
           },
           {
-            field: 'Orbital Period Days',
-            headerName: 'Orbital Period',
-            units: 'days',
-            type: 'number',
-            width: 200,
+            field: 'stopDate',
+            headerName: 'Stop Date',
+            width: 180,
           },
           {
-            field: 'Mass',
-            headerName: 'Mass',
-            units: 'Earth Mass',
-            type: 'number',
-            width: 200,
-          },
-          {
-            field: 'Eccentricity',
-            headerName: 'Eccentricity',
-            type: 'number',
-            width: 200,
+            field: 'description',
+            headerName: 'Description',
+            width: 400,
+            flex: 2,
           },
         ]}
         disableColumnSelector

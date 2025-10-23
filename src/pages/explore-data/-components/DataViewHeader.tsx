@@ -1,20 +1,22 @@
-import FilterListIcon from '@mui/icons-material/FilterList';
-import { Button, Stack, TextField, Typography } from '@mui/material';
+import { Stack, TextField, Typography } from '@mui/material';
 import React from 'react';
+import { HapiServerSelector, HapiServer } from './HapiServerSelector';
 
 interface DataViewHeaderProps {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-  onToggleFiltersPanel: () => void;
+  selectedServer: HapiServer;
+  onServerChange: (server: HapiServer) => void;
 }
 
 /**
- * Data table header section with filters button and search bar
+ * Data table header section with HAPI server selector and search bar
  */
 export const DataViewHeader: React.FC<DataViewHeaderProps> = ({
   searchTerm,
   setSearchTerm,
-  onToggleFiltersPanel,
+  selectedServer,
+  onServerChange,
 }) => {
   const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
     setSearchTerm(evt.target.value);
@@ -31,11 +33,12 @@ export const DataViewHeader: React.FC<DataViewHeaderProps> = ({
       }}
     >
       <Typography variant="h6" component="h2" flex={1}>
-        Entity List
+        HAPI Datasets
       </Typography>
-      <Button startIcon={<FilterListIcon />} onClick={onToggleFiltersPanel}>
-        Filters
-      </Button>
+      <HapiServerSelector
+        selectedServer={selectedServer}
+        onServerChange={onServerChange}
+      />
       <TextField
         variant="outlined"
         label="Search"

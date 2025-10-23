@@ -1,56 +1,14 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  IconButton,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, IconButton, Paper, Stack, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { LabelValueTable } from '../../../components/LabelValueTable';
-import { DataGrid } from '@mui/x-data-grid';
-import { AppLink } from '../../../components/AppLink';
-
-/**
- * Placeholder columns for related data table
- */
-const relatedColumns = [
-  {
-    field: 'id',
-    headerName: 'ID',
-    width: 50,
-  },
-  {
-    field: 'attr1',
-    headerName: 'Attribute 1',
-    width: 100,
-  },
-  {
-    field: 'attr2',
-    headerName: 'Attribute 2',
-    width: 100,
-  },
-  {
-    field: 'attr3',
-    headerName: 'Attribute 3',
-    width: 100,
-  },
-];
-
-/**
- * Placeholder rows for related data table
- */
-const emptyRows = Array(25).fill(0);
-const relatedRows = emptyRows.map((d, i) => {
-  return { id: i, attr1: 'value', attr2: 'value', attr3: 'value' };
-});
+import { HapiDataset } from '../../../hooks/useHapiCatalog';
 
 interface PreviewPanelProps {
   /**
-   * Data for the selected row from the main table
+   * Data for the selected HAPI dataset from the main table
    */
-  previewItem: any;
+  previewItem: HapiDataset;
   /**
    * Function to handle hiding
    */
@@ -58,8 +16,8 @@ interface PreviewPanelProps {
 }
 
 /**
- * Panel to show extra information about a row in a separate panel
- * next to the `<DataTablePanel>`.
+ * Panel to show extra information about a HAPI dataset in a separate panel
+ * next to the main data table.
  */
 export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   previewItem,
@@ -77,60 +35,39 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
         <Stack spacing={1}>
           <Stack direction="row">
             <Typography variant="h6" component="h3" flex={1}>
-              <AppLink to="/explore-data/$id" params={{ id: previewItem.Id }}>
-                {previewItem['Planet Name']}
-              </AppLink>
+              {previewItem.title || previewItem.id}
             </Typography>
             <IconButton size="small" onClick={onClose}>
               <CloseIcon />
             </IconButton>
           </Stack>
-          <Typography variant="body2">
-            Row description, subtitle, or helper text.
-          </Typography>
+          {previewItem.description && (
+            <Typography variant="body2">{previewItem.description}</Typography>
+          )}
         </Stack>
         <Box>
           <Typography fontWeight="medium" mb={1}>
-            Property Group 1
+            Dataset Information
           </Typography>
           <LabelValueTable
             rows={[
-              { label: 'Property 1', value: 'value' },
-              { label: 'Property 2', value: 'value' },
-              { label: 'Property 3', value: 'value' },
+              { label: 'Dataset ID', value: previewItem.id },
+              { label: 'Title', value: previewItem.title || 'N/A' },
+              { label: 'Contact', value: previewItem.contact || 'N/A' },
             ]}
           />
         </Box>
         <Box>
           <Typography fontWeight="medium" mb={1}>
-            Property Group 2
+            Time Range
           </Typography>
           <LabelValueTable
             rows={[
-              { label: 'Property 4', value: 'value' },
-              { label: 'Property 5', value: 'value' },
+              { label: 'Start Date', value: previewItem.startDate || 'N/A' },
+              { label: 'Stop Date', value: previewItem.stopDate || 'N/A' },
             ]}
           />
         </Box>
-        <Box>
-          <Typography fontWeight="medium" mb={1}>
-            Related Data
-          </Typography>
-          <DataGrid
-            rows={relatedRows}
-            columns={relatedColumns}
-            disableRowSelectionOnClick
-            initialState={{
-              pagination: { paginationModel: { pageSize: 5 } },
-            }}
-          />
-        </Box>
-        <Stack direction="row">
-          <AppLink to="/explore-data/$id" params={{ id: previewItem.Id }}>
-            <Button variant="contained">View details</Button>
-          </AppLink>
-          <Button variant="outlined">Export data</Button>
-        </Stack>
       </Stack>
     </Paper>
   );
