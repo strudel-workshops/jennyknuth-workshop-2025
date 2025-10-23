@@ -1,4 +1,11 @@
-import { Stack, TextField, Typography } from '@mui/material';
+import {
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 import React from 'react';
 import { HapiServerSelector, HapiServer } from './HapiServerSelector';
 
@@ -20,6 +27,10 @@ export const DataViewHeader: React.FC<DataViewHeaderProps> = ({
 }) => {
   const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
     setSearchTerm(evt.target.value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
   };
 
   return (
@@ -45,6 +56,20 @@ export const DataViewHeader: React.FC<DataViewHeaderProps> = ({
         size="small"
         value={searchTerm}
         onChange={handleSearch}
+        InputProps={{
+          endAdornment: searchTerm && (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="clear search"
+                onClick={handleClearSearch}
+                edge="end"
+                size="small"
+              >
+                <ClearIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
     </Stack>
   );
