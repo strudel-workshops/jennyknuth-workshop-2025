@@ -41,6 +41,32 @@ export const DataView: React.FC<DataViewProps> = ({
     setPreviewItem(rowData.row);
   };
 
+  /**
+   * Generate a HAPI data request URL for two weeks of data
+   */
+  const generateTwoWeekUrl = (dataset: any) => {
+    if (!dataset.startDate || !serverUrl) return '';
+
+    // Parse the start date from the dataset
+    const datasetStart = new Date(dataset.startDate);
+    const datasetStop = dataset.stopDate
+      ? new Date(dataset.stopDate)
+      : new Date();
+
+    // Calculate two weeks (14 days) from the start date
+    const twoWeeksLater = new Date(datasetStart);
+    twoWeeksLater.setDate(twoWeeksLater.getDate() + 14);
+
+    // Use the earlier of: two weeks later OR the dataset's stop date
+    const endDate = twoWeeksLater < datasetStop ? twoWeeksLater : datasetStop;
+
+    // Format dates as ISO strings (HAPI expects YYYY-MM-DDTHH:MM:SS.sssZ format)
+    const timeMin = datasetStart.toISOString();
+    const timeMax = endDate.toISOString();
+
+    return `${serverUrl}/data?id=${encodeURIComponent(dataset.id)}&time.min=${timeMin}&time.max=${timeMax}`;
+  };
+
   const handlePaginationModelChange = (model: GridPaginationModel) => {
     // Reset page to first when the page size changes
     const newPage = model.pageSize !== pageSize ? 0 : model.page;
@@ -102,6 +128,34 @@ export const DataView: React.FC<DataViewProps> = ({
             field: 'stopDate',
             headerName: 'Stop Date',
             width: 180,
+          },
+          {
+            field: 'requestUrl',
+            headerName: 'Request URL',
+            width: 400,
+            flex: 2,
+            valueGetter: (value, row) => generateTwoWeekUrl(row),
+            renderCell: (params) => (
+              <Box
+                component="a"
+                href={params.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  display: 'block',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+              >
+                {params.value}
+              </Box>
+            ),
           },
           {
             field: 'description',
