@@ -15,11 +15,6 @@ export interface HapiServer {
 
 export const HAPI_SERVERS: HapiServer[] = [
   {
-    id: 'sscweb',
-    name: 'SSCWeb',
-    url: 'https://sscweb.gsfc.nasa.gov/WS/hapi',
-  },
-  {
     id: 'cdaweb',
     name: 'CDAWeb',
     url: 'https://cdaweb.gsfc.nasa.gov/hapi',
@@ -33,6 +28,16 @@ export const HAPI_SERVERS: HapiServer[] = [
     id: 'lasp',
     name: 'LASP',
     url: 'https://lasp.colorado.edu/lisird/hapi',
+  },
+  {
+    id: 'knmi',
+    name: 'KNMI',
+    url: 'https://hapi.spaceweather.knmi.nl/hapi',
+  },
+  {
+    id: 'helioviewer',
+    name: 'Helioviewer',
+    url: 'https://api.helioviewer.org/hapi/Helioviewer/hapi',
   },
 ];
 
