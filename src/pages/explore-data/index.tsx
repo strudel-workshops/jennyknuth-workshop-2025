@@ -72,6 +72,7 @@ function DataExplorer() {
             >
               <PreviewPanel
                 previewItem={previewItem}
+                serverUrl={selectedServer.url}
                 onClose={handleClosePreview}
               />
             </Box>
